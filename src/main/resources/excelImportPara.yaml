@@ -1,0 +1,60 @@
+#项目种类：excel导入类型属性配置。支持多个文件存放,以便于维护管理
+#excel列项属性定义:
+#fieldname:?
+#fieldtype:?int,string等
+#dict:内容,内容
+#dataverifyrules:ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
+#dataverifyfun:数据校验函数名
+#errnotes:字段名(显示字段对应行的值)
+
+#excel导入类型字典
+assetsListImportType: 
+    - commonImport: 一般租赁物清单
+    - planImport: 飞机租赁物清单
+    - carImport: 车辆租赁物清单
+    - shipImport: 船舶租赁物清单
+
+assetsType: 
+    #业务类型businessType:租赁物excel导入类型
+    - generalAssets: [excel导入类型代码,excel导入类型代码]
+    #业务类型businessType:应收账款excel导入类型
+    - planeAssets: [excel导入类型代码,excel导入类型代码]
+    #根据项目需要自己加业务类型businessType
+
+#项目种类：所属的excel导入类型
+projectType: 
+    #业务类型businessType:租赁物excel导入类型
+    - directFinancialLeasing: [generalAssets]
+    #业务类型businessType:应收账款excel导入类型
+    - leaseback: [generalAssets,planeAssets]
+    #根据项目需要自己加业务类型businessType
+
+#excel导入类型属性
+commonImport: 
+    #表头所在行号
+    headerline: 1
+    #基本信息数据库表配置
+    basicTable: 
+        - [表名,[主键字段,主键字段]]
+        - [表名,[主键字段,主键字段]]
+    #明细数据库表配置
+    detailTable: 
+        - [表名,[主键字段,主键字段]]
+        - [表名,[主键字段,主键字段]]
+
+    #执行个性化处理组件，没有应不配置
+    comfun: [组件,组件]
+
+    #excel列项配置:配置有效的列
+    excelcolumns:
+        1: 
+            fieldname: name1
+            fieldtype: type1
+            dict: [内容,内容]
+            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
+            dataverifyfun: 数据个性校验函数名
+            errnotes: [字段名(显示字段对应行的值),字段名]
+        2: 
+            fieldname: name2
+
+#END

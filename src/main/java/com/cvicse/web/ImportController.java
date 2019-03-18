@@ -57,6 +57,7 @@ public class ImportController {
     
     @RequestMapping(value = "/chooseType", method = RequestMethod.GET)
     public String chooseType(@RequestParam(value = "fileSelect", required = true) MultipartFile fileSelect,HttpServletRequest request) {
+    	processService.importType();
     	System.out.println("---------fileSelect----------:"+fileSelect);
     	if (fileSelect.getSize() > 0) {
             //获取保存上传文件的file文件夹绝对路径

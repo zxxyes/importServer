@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServletRequest;
 public interface ProcessService {
 	
 	/**
-	 * 转换request属性为MAP
+	 * 获取导入类型
 	 * @param user
 	 * @return
 	 */
-	void request2Map(HttpServletRequest request,Map<String,Object> reqMap);
+	String importTypeAll();
 	
 	
 }
