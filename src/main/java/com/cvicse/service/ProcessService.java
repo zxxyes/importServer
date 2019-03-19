@@ -2,8 +2,6 @@ package com.cvicse.service;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 
 /**
  * 
@@ -19,7 +17,14 @@ public interface ProcessService {
 	 * @param user
 	 * @return
 	 */
-	String importTypeAll();
+	Map<String,String> importTypeAll();
+	
+	/**
+	 * 获取导入类型
+	 * @param user
+	 * @return
+	 */
+	Map<String,String> importTypeByAssetsType(String assetsType);
 	
 	
 }

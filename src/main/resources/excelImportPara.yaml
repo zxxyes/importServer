@@ -9,24 +9,24 @@
 
 #excel导入类型字典
 assetsListImportType: 
-    - commonImport: 一般租赁物清单
-    - planImport: 飞机租赁物清单
-    - carImport: 车辆租赁物清单
-    - shipImport: 船舶租赁物清单
+    commonImport: 一般租赁物清单
+    planImport: 飞机租赁物清单
+    carImport: 车辆租赁物清单
+    shipImport: 船舶租赁物清单
 
 assetsType: 
     #业务类型businessType:租赁物excel导入类型
-    - generalAssets: [excel导入类型代码,excel导入类型代码]
+    generalAssets: [excel导入类型代码,excel导入类型代码]
     #业务类型businessType:应收账款excel导入类型
-    - planeAssets: [excel导入类型代码,excel导入类型代码]
+    planeAssets: [excel导入类型代码,excel导入类型代码]
     #根据项目需要自己加业务类型businessType
 
 #项目种类：所属的excel导入类型
 projectType: 
     #业务类型businessType:租赁物excel导入类型
-    - directFinancialLeasing: [generalAssets]
+    directFinancialLeasing: [generalAssets]
     #业务类型businessType:应收账款excel导入类型
-    - leaseback: [generalAssets,planeAssets]
+    leaseback: [generalAssets,planeAssets]
     #根据项目需要自己加业务类型businessType
 
 #excel导入类型属性

@@ -16,13 +16,18 @@ $(function () {
 //    });
 	
 	$.ajax({
-        url: "/importType",
+        url: "/chooseType",
         type: "GET",
-        data: formData,
         contentType: "application/json",
         success: function (data, textStatus, jqXHR) {
             console.log(data);
-            var obj = JSON.parse(str);
+            //var obj = JSON.parse(data);
+            $("#excelType").append("<option value='0000'>==请选择==</option>");
+            for(var key in data){
+            	  console.log("属性：" + key + ",值：" + data[key]);
+            	  $("#excelType").append("<option value='"+key+"'>"+data[key]+"</option>");
+            	}
+           
         },
         error: function (jqXHR, textStatus, errorThrown) {
             if (jqXHR.status === 401 || jqXHR.status === 403) {
@@ -36,6 +41,11 @@ $(function () {
             }
         }
     });
+	
+	$("#excelType").change(function(){
+		var selectedVal = $("#excelType option:selected").val();
+		console.log(selectedVal);
+	});
 	
     function doUp(formData) {
         $.ajax({

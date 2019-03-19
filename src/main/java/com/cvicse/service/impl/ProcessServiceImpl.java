@@ -1,5 +1,8 @@
 package com.cvicse.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +20,26 @@ public class ProcessServiceImpl implements ProcessService {
 	
 
 	@Override
-	public String importTypeAll() {
-		return yamlConfig.getYamlMap().get("excelimporttypedict");
+	public Map<String,String> importTypeAll() {
+//		return yamlConfig.getYamlPojo().getAssetsListImportType().get("assetsListImportType");
+		return (Map<String,String>)yamlConfig.getYamlMap().get("assetsListImportType");
 	}
 
+
+	@Override
+	public Map<String, String> importTypeByAssetsType(String assetsType) {
+		Map<String, String[]> assetsTypes = yamlConfig.getYamlPojo().getAssetsType().get("assetsType");
+		String[] assetsListImportTypeKey = assetsTypes.get(assetsType);
+		Map<String,String> assetsListImportTypeAll = this.importTypeAll();
+		Map<String,String> assetsListImportTypeFilter = new HashMap<String,String>();
+		for (int i = 0; i < assetsListImportTypeKey.length; i++) {
+			String key = assetsListImportTypeKey[i];
+			if(assetsListImportTypeAll.containsKey(key)) {
+				assetsListImportTypeFilter.put(key, assetsListImportTypeAll.get(key));
+			}
+		}
+		return assetsListImportTypeFilter;
+	}
+	
 
 }

@@ -10,75 +10,44 @@ import java.util.Map;
  */
 public class YamlPojo {
 	
-	 private Map<String,String> assetsListImportType;
-	 private Map<String,String[]> assetsType;
-	 /** 编号 */
-	 private int id;
-	 /** 姓名 */
-	 private String name;
+	 private Map<String,Map<String,String>> assetsListImportType;
+	 private Map<String,Map<String,String[]>> assetsType;
+	 private Map<String,Map<String,String[]>> projectType;
 	 
-	 /** 年龄 */
-	 private int age;
 	 
 	 public YamlPojo(){
 	 }
-	 /**
-	  *  构造方法
-	  * @param id  编号
-	  * @param name  姓名
-	  */
-	public YamlPojo(int id, String name) {
-		super();
-		this.id = id;
-		this.name = name;
+
+
+	public Map<String, Map<String, String>> getAssetsListImportType() {
+		return assetsListImportType;
 	}
 
-	/**  
-	 * 获取编号  
-	 * @return id 
-	 */
-	public int getId() {
-		return id;
+
+	public void setAssetsListImportType(Map<String, Map<String, String>> assetsListImportType) {
+		this.assetsListImportType = assetsListImportType;
 	}
 
-	/**  
-	 * 设置编号  
-	 * @param id 
-	 */
-	public void setId(int id) {
-		this.id = id;
+
+	public Map<String, Map<String, String[]>> getAssetsType() {
+		return assetsType;
 	}
 
-	/**  
-	 * 获取姓名  
-	 * @return name 
-	 */
-	public String getName() {
-		return name;
+
+	public void setAssetsType(Map<String, Map<String, String[]>> assetsType) {
+		this.assetsType = assetsType;
 	}
 
-	/**  
-	 * 设置姓名  
-	 * @param name 
-	 */
-	public void setName(String name) {
-		this.name = name;
+
+	public Map<String, Map<String, String[]>> getProjectType() {
+		return projectType;
 	}
-	/**  
-	 * 获取年龄  
-	 * @return  age  
-	 */
-	public int getAge() {
-		return age;
+
+
+	public void setProjectType(Map<String, Map<String, String[]>> projectType) {
+		this.projectType = projectType;
 	}
-	/**  
-	 * 设置年龄  
-	 * @param int age  
-	 */
-	public void setAge(int age) {
-		this.age = age;
-	}
-	
-	
+	 
+	 
 
 }

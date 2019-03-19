@@ -2,6 +2,7 @@ package com.cvicse.web;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -56,27 +57,9 @@ public class ImportController {
     }
     
     @RequestMapping(value = "/chooseType", method = RequestMethod.GET)
-    public String chooseType(@RequestParam(value = "fileSelect", required = true) MultipartFile fileSelect,HttpServletRequest request) {
-    	processService.importType();
-    	System.out.println("---------fileSelect----------:"+fileSelect);
-    	if (fileSelect.getSize() > 0) {
-            //获取保存上传文件的file文件夹绝对路径
-            String path = request.getSession().getServletContext().getRealPath("");
-            //获取上传文件名
-            String fileName = fileSelect.getOriginalFilename();
-            File file = new File(path, fileName);
-            try {
-            	fileSelect.transferTo(file);
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-            //保存上传之后的文件路径
-            request.setAttribute("filePath", "file/"+fileName);
-            return "upload";
-          }
-        return "error";
+    public Map<String, String> chooseType(HttpServletRequest request) {
+    	Map<String, String> importTypeAll = processService.importTypeAll();
+        return importTypeAll;
     }
     
     
