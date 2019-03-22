@@ -2,6 +2,9 @@ package com.cvicse.web;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cvicse.service.ConnectService;
+import com.cvicse.service.ExcelService;
 import com.cvicse.service.ProcessService;
 
 /**
@@ -32,10 +36,17 @@ public class ImportController {
     private ConnectService connectService;
 	@Autowired
     private ProcessService processService;
+	@Autowired
+    private ExcelService excelService;
 	
     @RequestMapping(value = "/import", method = RequestMethod.POST)
     public String importFile(@RequestParam(value = "fileSelect", required = true) MultipartFile fileSelect,HttpServletRequest request) {
+    	Map<String,Object> reqMap = new HashMap<String,Object>();
+    	connectService.getParameterMap(request, reqMap);
+    	String projectId = ((String)reqMap.get("projectId"));
+    	String assetsId = ((String)reqMap.get("assetsId"));
     	System.out.println("---------fileSelect----------:"+fileSelect);
+    	String errorInfo = "";
     	if (fileSelect.getSize() > 0) {
             //获取保存上传文件的file文件夹绝对路径
             String path = request.getSession().getServletContext().getRealPath("");
@@ -44,23 +55,56 @@ public class ImportController {
             File file = new File(path, fileName);
             try {
             	fileSelect.transferTo(file);
+            	List<Map<String, Object>> excelDataMap = excelService.loadExcel2Map(file,errorInfo);
+            	if(null != errorInfo&& !errorInfo.isEmpty()) {
+            		return errorInfo;
+            	}
+            	excelService.save(excelDataMap,errorInfo);
+            	if(null != errorInfo&& !errorInfo.isEmpty()) {
+            		return errorInfo;
+            	}
 			} catch (IllegalStateException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
 			}
             //保存上传之后的文件路径
             request.setAttribute("filePath", "file/"+fileName);
-            return "upload";
           }
-        return "error";
+        return "导入成功";
     }
     
-    @RequestMapping(value = "/chooseType", method = RequestMethod.GET)
-    public Map<String, String> chooseType(HttpServletRequest request) {
-    	Map<String, String> importTypeAll = processService.importTypeAll();
+    @RequestMapping(value = "/assetsTypes", method = RequestMethod.GET)
+    public Map<String, String> assetsTypes(HttpServletRequest request) {
+    	Map<String, String> importTypeAll = processService.assetsTypeAll();
         return importTypeAll;
     }
+    
+    @RequestMapping(value = "/imporotTypes", method = RequestMethod.GET)
+    public Map<String, String> imporotTypes(HttpServletRequest request) {
+    	Map<String,Object> reqMap = new HashMap<String,Object>();
+    	connectService.request2Map(request, reqMap);
+    	String assetsType = ((String[])reqMap.get("assetsType"))[0];
+    	//String assetsType = request.getParameter("assetsType");
+    	Map<String, String> importTypeAll = processService.importTypeByAssetsType(assetsType);
+        return importTypeAll;
+    }
+    
+    
     
     
 }

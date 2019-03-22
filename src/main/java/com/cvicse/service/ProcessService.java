@@ -13,6 +13,12 @@ import java.util.Map;
 public interface ProcessService {
 	
 	/**
+	 *租赁物种类
+	 * @return
+	 */
+	Map<String, String> assetsTypeAll();
+	
+	/**
 	 * 获取导入类型
 	 * @param user
 	 * @return

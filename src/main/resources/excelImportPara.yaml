@@ -16,10 +16,19 @@ assetsListImportType:
 
 assetsType: 
     #业务类型businessType:租赁物excel导入类型
-    generalAssets: [excel导入类型代码,excel导入类型代码]
+    generalAssets: 金属加工设备
     #业务类型businessType:应收账款excel导入类型
-    planeAssets: [excel导入类型代码,excel导入类型代码]
+    planeAssets: 直升机
     #根据项目需要自己加业务类型businessType
+    carAssets: 货船
+
+assetsTypeRelImportType: 
+    #业务类型businessType:租赁物excel导入类型
+    generalAssets: [commonImport,planImport]
+    #业务类型businessType:应收账款excel导入类型
+    planeAssets: [planImport]
+    #根据项目需要自己加业务类型businessType
+    carAssets: [carAssets,shipImport]
 
 #项目种类：所属的excel导入类型
 projectType: 
@@ -32,29 +41,84 @@ projectType:
 #excel导入类型属性
 commonImport: 
     #表头所在行号
-    headerline: 1
+    headerline: !!int 
+     1
     #基本信息数据库表配置
     basicTable: 
-        - [表名,[主键字段,主键字段]]
-        - [表名,[主键字段,主键字段]]
     #明细数据库表配置
     detailTable: 
-        - [表名,[主键字段,主键字段]]
-        - [表名,[主键字段,主键字段]]
+        - 
+         tableName: kzassetsinfor
+         columns: [XH,ASSETSNAME,HAVEINVOICE,INVOICECODE,UNITPRICE,RECORDELIVERDATE]
+         PK: 
+           - ID: 
+               filedtype: 
+                       basetype: String
+                       length: 50
+               creator: 
+                      class: com.cvicse.util.AssetsKey
+                      method: keyGenerator
 
     #执行个性化处理组件，没有应不配置
-    comfun: [组件,组件]
+    comfun: []
 
     #excel列项配置:配置有效的列
-    excelcolumns:
+    excelcolumns:  
+        0: 
+            fieldname: XH
+            fieldtype: 
+                    basetype: int
+                    scope:  10
+            dict: 
+            dataverifyrules: ok
+            dataverifyfun: 
+            errnotes: 数据类型不匹配
         1: 
-            fieldname: name1
-            fieldtype: type1
-            dict: [内容,内容]
+            fieldname: ASSETSNAME
+            fieldtype: 
+                     basetype: String
+                     scope:  100
+            dict: 租赁物名称
             dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
             dataverifyfun: 数据个性校验函数名
-            errnotes: [字段名(显示字段对应行的值),字段名]
+            errnotes: 数据类型不匹配
         2: 
-            fieldname: name2
+            fieldname: HAVEINVOICE
+            fieldtype: 
+                     basetype: string
+                     scope:  100
+            dict: 
+                 0: 无
+                 1: 有
+            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
+            dataverifyfun: 数据个性校验函数名
+            errnotes: 数据类型不匹配
+        3: 
+            fieldname: INVOICECODE
+            fieldtype: 
+                     basetype: string
+                     scope: 100
+            dict: 发票号
+            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
+            dataverifyfun: 数据个性校验函数名
+            errnotes: 数据类型不匹配
+        6: 
+            fieldname: UNITPRICE
+            fieldtype: 
+                     basetype: double
+                     scope: 16,2
+            dict: 单价(元)
+            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
+            dataverifyfun: 数据个性校验函数名
+            errnotes: 数据类型不匹配
+        11: 
+            fieldname: RECORDELIVERDATE
+            fieldtype: 
+                      basetype: date
+                      scope: 
+            dict: 购置日期
+            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
+            dataverifyfun: 数据个性校验函数名
+            errnotes: 数据类型不匹配
 
 #END

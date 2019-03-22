@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <title>file upload Demo</title>
+   <title>租赁物清单导入</title>
 
    <!-- Latest compiled and minified CSS -->
    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
@@ -15,21 +15,31 @@
 </head>
 <body>
 <div class="container">
-   <h1>file upload Demo</h1>
+   <h1>租赁物清单导入</h1>
    <div class="row">
       <div class="col-md-12">
 
          <div id="userInfo">
             <div class="panel panel-default">
                <div class="panel-heading">
-                  <h3 class="panel-title">file upload</h3>
+                  <h3 class="panel-title">信息录入</h3>
                </div>
-               <form id="upForm"  action="import" method="post" enctype="multipart/form-data">
+               <form id="upForm"  action="import" method="post" enctype="multipart/form-data" >
 	               <div class="panel-body">
 	               	 <div class="form-group">
-	               	 	 <input type="text" class="form-control" id="projectType" placeholder="projectType"
-	                            required name="projectType">
-	                     <select name="excelType" id="excelType" class="form-control"></select>
+	               	 	 <label class="control-label" >项目ID</label>
+	               	 	 <input type="text" class="form-control" id="projectId" placeholder="projectId"
+	                            required name="projectId">
+	                     <label class="control-label" >租赁物ID</label>
+	               	 	 <input type="text" class="form-control" id="assetsId" placeholder="assetsId"
+	                            required name="assetsId">
+	                     <label class="control-label" >租赁物类型</label>
+	                     <select name="assetsType" id="assetsType" class="form-control"></select>
+	                     <label class="control-label" >导入类型</label>
+	                     <select name="excelType" id="excelType" class="form-control">
+	                     	<option value='0000'>==请选择==</option>
+	                     </select>
+	                     <label class="control-label" >导入清单上传</label>
 	                     <input type="file" class="form-control" id="fileSelect" placeholder="fileSelect"
 	                            required name="fileSelect">
 	                  </div>

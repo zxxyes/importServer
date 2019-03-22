@@ -20,6 +20,7 @@ public interface ConnectService {
 	 * @return
 	 */
 	void request2Map(HttpServletRequest request,Map<String,Object> reqMap);
+	public Map getParameterMap(HttpServletRequest request,Map reqMap);
 	
 	
 }
