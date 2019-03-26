@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import com.cvicse.dao.exception.ReflectionException;
+import com.cvicse.exception.DataAccessException;
+
 
 /**
  * 
@@ -19,9 +22,11 @@ public interface ExcelService {
 	 *文件转为list map
 	 * @return
 	 */
-	List<Map<String, Object>> loadExcel2Map(File file,String errorInfo);
+	List<Map<String, Object>> loadExcel2Map(File file,StringBuilder errorInfo);
 	
-	void save(List<Map<String, Object>> excelDtaMap,String errorInfo)  throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException ;
+	void save(List<Map<String, Object>> excelDtaMap,StringBuilder errorInfo)  throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException ;
+	
+	void saveJDao(List<Map<String, Object>> excelDtaMap,StringBuilder errorInfo) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, DataAccessException, ReflectionException;
 	
 	
 }

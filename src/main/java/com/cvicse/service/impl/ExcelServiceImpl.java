@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,12 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.cvicse.config.YamlConfig;
+import com.cvicse.dao.MapDao;
+import com.cvicse.dao.exception.ReflectionException;
+import com.cvicse.exception.DataAccessException;
 import com.cvicse.service.ExcelService;
 import com.cvicse.util.DataTypeChecker;
 
@@ -53,9 +52,10 @@ public class ExcelServiceImpl implements ExcelService {
 	ApplicationContext applicationContext;
 
 	@Override
-	public List<Map<String, Object>> loadExcel2Map(File file,String errorInfo) {
+	public List<Map<String, Object>> loadExcel2Map(File file,StringBuilder errorInfo) {
 
 		List<Map<String, Object>> loadedDataListMap = new ArrayList<Map<String, Object>>();
+		Map<Integer,String> colNumNameMap = new HashMap<Integer,String>();
 		Map<String, Object> commonImport = (Map<String, Object>) yamlConfig.getYamlMap().get("commonImport");
 		int headerline = (int) commonImport.get("headerline");
 		Map<Integer, Object> excelcolumns = (Map<Integer, Object>) commonImport.get("excelcolumns");
@@ -67,6 +67,19 @@ public class ExcelServiceImpl implements ExcelService {
 			fis = new FileInputStream(file);
 			wb = WorkbookFactory.create(fis);
 			Sheet sheet = wb.getSheetAt(0);
+			Row headerRow = sheet.getRow(headerline);
+			if(headerRow != null) {
+				Iterator columnNumIterator = columnNumSet.iterator();
+				while (columnNumIterator.hasNext()) {
+					String keyStr = (String) columnNumIterator.next();
+					int key = Integer.parseInt(keyStr);
+					Map<String, Object> excelColumnsParam = (Map<String, Object>) excelcolumns.get(keyStr);
+					String fieldname = (String) excelColumnsParam.get("fieldname");
+					Cell bCell = headerRow.getCell(key);
+					colNumNameMap.put(key, bCell.toString());
+				}
+				
+			}
 			int BodyFirstRowNum = headerline + 1;
 			int BodyLastRowNum = sheet.getLastRowNum()+1;
 			for (int i = BodyFirstRowNum; i < BodyLastRowNum; i++) {
@@ -83,12 +96,16 @@ public class ExcelServiceImpl implements ExcelService {
 						Map<String,String> fieldtype = (Map<String,String>) excelColumnsParam.get("fieldtype");
 						String basetype = (String)fieldtype.get("basetype");
 						String scope = (String)fieldtype.get("scope");
-						String dict = (String)excelColumnsParam.get("dict");
+						Map<String,String> dict = (Map<String,String>)excelColumnsParam.get("dict");
+						String dataverifyrules = (String)excelColumnsParam.get("dataverifyrules"); 
 						String errnotes = (String)excelColumnsParam.get("errnotes");
 						Cell bCell = bodyRow.getCell(key);
 						if (bCell != null) {
 							Object cellObj = getCellStringOrDateVal(bCell);
-							String[] sqlValAErr = this.genSqlValByYamlColType(cellObj, basetype,scope,dict,errnotes);
+							if(null != dict && !dict.isEmpty()) {
+								cellObj = this.genDictVal(cellObj, dict);
+							}
+							String[] sqlValAErr = this.valiAGenSqlValByYamlColType(cellObj, basetype,scope,dataverifyrules,errnotes,i,key,colNumNameMap);
 							rowMap.put(fieldname.toLowerCase(), sqlValAErr[0]);
 //							if ((cellObj instanceof Date)) {
 //								rowMap.put(fieldname.toLowerCase(), cellObj);
@@ -97,7 +114,7 @@ public class ExcelServiceImpl implements ExcelService {
 //								rowMap.put(fieldname.toLowerCase(), cellObj);
 //							}
 						 if(null != sqlValAErr[1]&& !sqlValAErr[1].isEmpty()) {
-					        	errorInfo = errorInfo.concat(sqlValAErr[1]);
+					        	errorInfo = errorInfo.append(sqlValAErr[1]);
 					        }
 						}
 					}
@@ -128,7 +145,7 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
 	@Override
-	public void save(List<Map<String, Object>> excelDtaMap,String errorInfo) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void save(List<Map<String, Object>> excelDtaMap,StringBuilder errorInfo) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Map<String, Object> commonImport = (Map<String, Object>) yamlConfig.getYamlMap().get("commonImport");
 		List<Map<String, Object>> basicTables = (List<Map<String, Object>>) commonImport.get("basicTable");
 		List<Map<String, Object>> detailTables = (List<Map<String, Object>>) commonImport.get("detailTable");
@@ -165,18 +182,18 @@ public class ExcelServiceImpl implements ExcelService {
 							Map<String,String> creator = (Map<String,String>)idInfor.get("creator");
 							String classStr = (String)creator.get("class");
 							String methodStr = (String)creator.get("method");
-//							String classStr = IDGen.substring(0, IDGen.lastIndexOf("."));
-//							String methodStr = IDGen.substring(IDGen.lastIndexOf(".")+1);
 							Class classClass = Class.forName(classStr);  
 					        //获取add()方法
 					        Method m = classClass.getMethod(methodStr);
 					        //调用add()方法
 					        Object obj = classClass.getConstructor().newInstance();  
 					        String idVal = (String)m.invoke(obj);
-					        String[] idValAErr = this.genSqlValByYamlColType(idVal, basetype, scope,"主键","类型不匹配");
+					        Map<Integer,String> colNumNameMap = new HashMap<Integer,String>();
+					        colNumNameMap.put(0, "主键");
+					        String[] idValAErr = this.valiAGenSqlValByYamlColType(idVal, basetype, scope,"ok","$ROWNUM 行 ID 错误",i,0,colNumNameMap);
 					        idValPart = idValPart.concat(idValAErr[0]+",");
 					        if(null != idValAErr[1]&& !idValAErr[1].isEmpty()) {
-					        	errorInfo = errorInfo.concat(idValAErr[1]);
+					        	errorInfo = errorInfo.append(idValAErr[1]);
 					        }
 					        
 						}
@@ -254,7 +271,16 @@ public class ExcelServiceImpl implements ExcelService {
 		return cellValStr;
 	}
 	
-	protected String[] genSqlValByYamlColType(Object excelColVal,String yamlColType,String scope,String dict,String errnotes) {
+	protected String[] valiAGenSqlValByYamlColType(Object excelColVal,String yamlColType,String scope,String dataverifyrules,String errnotes,int rownum,int colnum,Map<Integer,String> colNumNameMap) {
+		if("ok".equalsIgnoreCase(dataverifyrules)) {
+			return this.genSqlValByYamlColTypeOK(excelColVal, yamlColType, scope, errnotes,rownum,colnum,colNumNameMap);
+		}else {
+			//TODO 
+			return null;
+		}
+	}
+	
+	protected String[] genSqlValByYamlColTypeOK(Object excelColVal,String yamlColType,String scope,String errnotes,int rownum,int colnum,Map<Integer,String> colNumNameMap) {
 		String[] sqlValAErr = new String[2];
 		String sqlVal = "";
 		String errorInfo = "";
@@ -262,7 +288,9 @@ public class ExcelServiceImpl implements ExcelService {
 			//String dateJava = (new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss")).format((Date)excelColVal);
 			boolean ok = DataTypeChecker.checkDate((String)excelColVal);
 			if(!ok){
-				errorInfo = errorInfo.concat(dict+"("+excelColVal+"):"+errnotes);
+				errnotes = errnotes.replace("$ROWNUM", String.valueOf(rownum));
+				errnotes = errnotes.replace("$FIELDNAME", colNumNameMap.get(colnum));
+				errorInfo = errorInfo.concat(errnotes);
 			}
 			String dateJava = "";
 			if(null != scope && !scope.isEmpty()) {
@@ -275,12 +303,16 @@ public class ExcelServiceImpl implements ExcelService {
 		}else if(yamlColType.equalsIgnoreCase("int")) {
 			boolean ok = DataTypeChecker.checkNumber((String)excelColVal, "0+");
 			if(!ok){
-				errorInfo = errorInfo.concat(dict+"("+excelColVal+"):"+errnotes);
+				errnotes = errnotes.replace("$ROWNUM", String.valueOf(rownum));
+				errnotes = errnotes.replace("$FIELDNAME", colNumNameMap.get(colnum));
+				errorInfo = errorInfo.concat(errnotes);
 			}
 			if(null != scope && !scope.isEmpty()) {
 				int length = Integer.parseInt(scope);
 				if(excelColVal.toString().length()>length) {
-					errorInfo = errorInfo.concat(dict+"("+excelColVal+"):"+errnotes);
+					errnotes = errnotes.replace("$ROWNUM", String.valueOf(rownum));
+					errnotes = errnotes.replace("$FIELDNAME", colNumNameMap.get(colnum));
+					errorInfo = errorInfo.concat(errnotes);
 				}
 			}
 			sqlVal = (String)excelColVal;
@@ -288,13 +320,17 @@ public class ExcelServiceImpl implements ExcelService {
 			String excelColValCutPoint = ((String)excelColVal).replaceAll(",", "");
 			boolean ok = DataTypeChecker.checkFloat(excelColValCutPoint, "+");
 			if(!ok){
-				errorInfo = errorInfo.concat(dict+"("+excelColVal+"):"+errnotes);
+				errnotes = errnotes.replace("$ROWNUM", String.valueOf(rownum));
+				errnotes = errnotes.replace("$FIELDNAME", colNumNameMap.get(colnum));
+				errorInfo = errorInfo.concat(errnotes);
 			}
 			if(null != scope && !scope.isEmpty()) {
 				String[] scopeArr = scope.split(",");
 				String[] excelColValArr = (excelColValCutPoint.split("\\."));
 				if(excelColValArr[0].length()>Integer.parseInt(scopeArr[0])||excelColValArr[1].length()>Integer.parseInt(scopeArr[1])) {
-					errorInfo = errorInfo.concat(dict+"("+excelColVal+"):"+errnotes);
+					errnotes = errnotes.replace("$ROWNUM", String.valueOf(rownum));
+					errnotes = errnotes.replace("$FIELDNAME", colNumNameMap.get(colnum));
+					errorInfo = errorInfo.concat(errnotes);
 				}
 			}
 			sqlVal = excelColValCutPoint;
@@ -304,6 +340,73 @@ public class ExcelServiceImpl implements ExcelService {
 		sqlValAErr[0] = sqlVal;
 		sqlValAErr[1] = errorInfo;
 		return sqlValAErr;
+	}
+	
+	protected String genDictVal(Object excelColVal,Map<String,String> dict) {
+		return dict.get(excelColVal.toString());
+	}
+	
+	@Override
+	public void saveJDao(List<Map<String, Object>> excelDtaMap,StringBuilder errorInfo) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, DataAccessException, ReflectionException {
+		Map<String, Object> commonImport = (Map<String, Object>) yamlConfig.getYamlMap().get("commonImport");
+		List<Map<String, Object>> basicTables = (List<Map<String, Object>>) commonImport.get("basicTable");
+		List<Map<String, Object>> detailTables = (List<Map<String, Object>>) commonImport.get("detailTable");
+		List<Map<String, Object>> allTables = new ArrayList<Map<String, Object>>();
+		List<String> batchSql = new ArrayList<String>();
+		
+		if (null != basicTables && !basicTables.isEmpty()) {
+			allTables.addAll(basicTables);
+		}
+		if (null != detailTables && !detailTables.isEmpty()) {
+			allTables.addAll(detailTables);
+		}
+		MapDao mapDao = new MapDao();
+		if(null != allTables && !allTables.isEmpty()) {
+			for (int i = 0; i < excelDtaMap.size(); i++) {
+				Map<String, Object> dataMap = excelDtaMap.get(i);
+				for (int j = 0; j < allTables.size(); j++) {
+					Map<String, Object> tablePK = allTables.get(j);
+					String tableName = (String) tablePK.get("tableName");
+					List<Object> pks = (List<Object>) tablePK.get("PK");
+					for (int k = 0; k < pks.size(); k++) {
+						Map<String,Object> pkMap = (Map<String,Object>)pks.get(k);
+						Iterator iter = pkMap.keySet().iterator();
+						String idColPart = "";
+						String idValPart = "";
+						while(iter.hasNext()) {
+							String ID = (String)iter.next();
+							Map<String,Object> idInfor = (Map<String,Object>)pkMap.get(ID);
+							Map<String,String> filedtype = (Map<String,String>)idInfor.get("filedtype");
+							String basetype = (String)filedtype.get("basetype");
+							String scope = (String)filedtype.get("scope");
+							idColPart = idColPart.concat(ID+",");
+							Map<String,String> creator = (Map<String,String>)idInfor.get("creator");
+							String classStr = (String)creator.get("class");
+							String methodStr = (String)creator.get("method");
+//							String classStr = IDGen.substring(0, IDGen.lastIndexOf("."));
+//							String methodStr = IDGen.substring(IDGen.lastIndexOf(".")+1);
+							Class classClass = Class.forName(classStr);  
+					        //获取add()方法
+					        Method m = classClass.getMethod(methodStr);
+					        //调用add()方法
+					        Object obj = classClass.getConstructor().newInstance();  
+					        String idVal = (String)m.invoke(obj);
+					        Map<Integer,String> colNumNameMap = new HashMap<Integer,String>();
+					        colNumNameMap.put(0, "主键");
+					        String[] idValAErr = this.valiAGenSqlValByYamlColType(idVal, basetype, scope,"ok","$ROWNUM 行 ID 错误",i,0,colNumNameMap);
+					        idValPart = idValPart.concat(idValAErr[0]+",");
+					        if(null != idValAErr[1]&& !idValAErr[1].isEmpty()) {
+					        	errorInfo = errorInfo.append(idValAErr[1]);
+					        }
+					        
+						}
+						dataMap.put(idColPart, idValPart);
+					}
+					mapDao.insert(tableName, dataMap);
+				}
+			}
+		}
+
 	}
 
 }

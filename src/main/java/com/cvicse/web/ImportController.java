@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cvicse.dao.exception.ReflectionException;
+import com.cvicse.exception.DataAccessException;
 import com.cvicse.service.ConnectService;
 import com.cvicse.service.ExcelService;
 import com.cvicse.service.ProcessService;
@@ -46,7 +48,7 @@ public class ImportController {
     	String projectId = ((String)reqMap.get("projectId"));
     	String assetsId = ((String)reqMap.get("assetsId"));
     	System.out.println("---------fileSelect----------:"+fileSelect);
-    	String errorInfo = "";
+    	StringBuilder errorInfo = new StringBuilder("");
     	if (fileSelect.getSize() > 0) {
             //获取保存上传文件的file文件夹绝对路径
             String path = request.getSession().getServletContext().getRealPath("");
@@ -56,12 +58,12 @@ public class ImportController {
             try {
             	fileSelect.transferTo(file);
             	List<Map<String, Object>> excelDataMap = excelService.loadExcel2Map(file,errorInfo);
-            	if(null != errorInfo&& !errorInfo.isEmpty()) {
-            		return errorInfo;
+            	if(null != errorInfo&& errorInfo.length()>0) {
+            		return errorInfo.toString();
             	}
             	excelService.save(excelDataMap,errorInfo);
-            	if(null != errorInfo&& !errorInfo.isEmpty()) {
-            		return errorInfo;
+            	if(null != errorInfo&& errorInfo.length()>0) {
+            		return errorInfo.toString();
             	}
 			} catch (IllegalStateException e) {
 				e.printStackTrace();
@@ -81,7 +83,9 @@ public class ImportController {
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
 				e.printStackTrace();
-			}
+			} catch (DataAccessException e) {
+				e.printStackTrace();
+			} 
             //保存上传之后的文件路径
             request.setAttribute("filePath", "file/"+fileName);
           }

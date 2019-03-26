@@ -62,7 +62,10 @@ commonImport:
     #执行个性化处理组件，没有应不配置
     comfun: []
 
-    #excel列项配置:配置有效的列
+    #excel列项配置:配置有效的列。
+    #dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等。
+    #dataverifyfun: 数据个性校验函数名
+    #dict: 字段参数字典
     excelcolumns:  
         0: 
             fieldname: XH
@@ -72,53 +75,53 @@ commonImport:
             dict: 
             dataverifyrules: ok
             dataverifyfun: 
-            errnotes: 数据类型不匹配
+            errnotes: $ROWNUM行 $FIELDNAME错误;
         1: 
             fieldname: ASSETSNAME
             fieldtype: 
                      basetype: String
                      scope:  100
-            dict: 租赁物名称
-            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
-            dataverifyfun: 数据个性校验函数名
-            errnotes: 数据类型不匹配
+            dict: 
+            dataverifyrules: ok
+            dataverifyfun: 
+            errnotes: $ROWNUM $FIELDNAME 错误;
         2: 
             fieldname: HAVEINVOICE
             fieldtype: 
                      basetype: string
                      scope:  100
             dict: 
-                 0: 无
-                 1: 有
-            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
-            dataverifyfun: 数据个性校验函数名
-            errnotes: 数据类型不匹配
+                 无: 0
+                 有: 1
+            dataverifyrules: ok
+            dataverifyfun: 
+            errnotes: $ROWNUM $FIELDNAME 错误
         3: 
             fieldname: INVOICECODE
             fieldtype: 
                      basetype: string
                      scope: 100
-            dict: 发票号
-            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
-            dataverifyfun: 数据个性校验函数名
-            errnotes: 数据类型不匹配
+            dict: 
+            dataverifyrules: ok
+            dataverifyfun: 
+            errnotes: $ROWNUM $FIELDNAME 错误;
         6: 
             fieldname: UNITPRICE
             fieldtype: 
                      basetype: double
                      scope: 16,2
-            dict: 单价(元)
-            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
-            dataverifyfun: 数据个性校验函数名
-            errnotes: 数据类型不匹配
+            dict: 
+            dataverifyrules: ok
+            dataverifyfun: 
+            errnotes: $ROWNUM $FIELDNAME 错误;
         11: 
             fieldname: RECORDELIVERDATE
             fieldtype: 
                       basetype: date
                       scope: 
-            dict: 购置日期
-            dataverifyrules: ok为按照fieldtype校验,也可以用计算表达式:字段名>字段名等
-            dataverifyfun: 数据个性校验函数名
-            errnotes: 数据类型不匹配
+            dict: 
+            dataverifyrules: ok
+            dataverifyfun: 
+            errnotes: $ROWNUM $FIELDNAME 错误;
 
 #END
